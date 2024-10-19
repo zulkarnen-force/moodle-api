@@ -10,8 +10,8 @@ class MoodleApi
           $this->MoodleRest = new MoodleRest();
           $this->MoodleRest->setServerAddress($serverAddress);
           $this->MoodleRest->setToken($token);
-          $this->MoodleRest->setReturnFormat(MoodleRest::RETURN_JSON);
-          $this->MoodleRest->setDebug();
+          $this->MoodleRest->setReturnFormat(MoodleRest::RETURN_ARRAY);
+          // $this->MoodleRest->setDebug();
      }
 
      public function get_core_user_get_course_user_profiles()
@@ -37,6 +37,47 @@ class MoodleApi
                'users' => [$userData]
           ];
           return $this->MoodleRest->request('core_user_create_users', $params);
+     }
+     // New method to get all users
+     public function getAllUserByIds($userIds = [])
+     {
+          $params = [
+               'criteria' => [
+                    [
+                         'key' => 'username',
+                         'value' => implode(',', $userIds) // Optional: filter by user IDs if provided
+                    ]
+               ]
+          ];
+          return $this->MoodleRest->request('core_user_get_users', $params);
+     }
+
+     // New method to get a user by username
+     public function getUserByUsername($username)
+     {
+          $params = [
+               'criteria' => [
+                    [
+                         'key' => 'username',
+                         'value' => $username
+                    ]
+               ]
+          ];
+          return $this->MoodleRest->request('core_user_get_users', $params);
+     }
+
+     // New method to get a user by email
+     public function getUser($key, $value)
+     {
+          $params = [
+               'criteria' => [
+                    [
+                         'key' => $key,
+                         'value' => $value
+                    ]
+               ]
+          ];
+          return $this->MoodleRest->request('core_user_get_users', $params)['users'][0];
      }
 }
 

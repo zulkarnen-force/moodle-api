@@ -13,8 +13,9 @@ $userData = [
      'lang' => 'en',
      'timezone' => 'Asia/Jakarta',
 ];
-$response = $elearning->registerUser($userData);
-$test = $elearning->getGradeReport(1);
+// $response = $elearning->registerUser($userData);
+$response = $elearning->getUser('email', 'johndoe123@example.com');
+// $test = $elearning->getGradeReport(1);
 print_r($response);
-print_r($test);
+// print_r($test);
 die();
