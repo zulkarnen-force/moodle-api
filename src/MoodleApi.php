@@ -22,25 +22,6 @@ class MoodleApi
           $this->MoodleRest->setReturnFormat(MoodleRest::RETURN_ARRAY);
      }
 
-     /**
-      * Get course user profiles for a list of users.
-      * 
-      * @return array Response from the Moodle API
-      * 
-      * @example
-      * $profiles = $moodleApi->get_core_user_get_course_user_profiles();
-      * print_r($profiles);
-      */
-     public function get_core_user_get_course_user_profiles()
-     {
-          $params = [
-               'userlist' => [
-                    ['userid' => 5, 'courseid' => 2],
-                    ['userid' => 4, 'courseid' => 2]
-               ]
-          ];
-          return $this->MoodleRest->request('core_user_get_course_user_profiles', $params);
-     }
 
      /**
       * Get grade report for a course.
@@ -52,10 +33,10 @@ class MoodleApi
       * $gradeReport = $moodleApi->getGradeReport(2);
       * print_r($gradeReport);
       */
-     public function getGradeReport($courseId)
+     public function getGradesReport($courseId)
      {
           $params = ['courseid' => $courseId];
-          return $this->MoodleRest->request('gradereport_user_get_grade_items', $params);
+          return $this->MoodleRest->request('gradereport_user_get_grade_items', $params)['usergrades'];
      }
 
      /**
@@ -230,5 +211,45 @@ class MoodleApi
           } catch (\Throwable $th) {
                throw $th;
           }
+     }
+
+     /**
+      * Get all categories.
+      * 
+      * @return array Response from the Moodle API
+      * 
+      * @example
+      * $categories = $moodleApi->getCategories();
+      * print_r($categories);
+      */
+     public function getCategories()
+     {
+          return $this->MoodleRest->request('core_category_get_categories');
+     }
+
+
+     /**
+      * Add a student to a course.
+      * 
+      * @param int $courseId Course ID
+      * @param int $studentId Student ID
+      * @return array Response from the Moodle API
+      * 
+      * @example
+      * $response = $moodleApi->addStudentToCourse(2, 3);
+      * print_r($response);
+      */
+     public function addStudentToCourse($studentId, $courseId)
+     {
+          $params = [
+               'enrolments' => [
+                    [
+                         'roleid' => 5, // Role ID for the student
+                         'userid' => $studentId, // ID of the student to enroll
+                         'courseid' => $courseId, // ID of the course where the student should be enrolled
+                    ],
+               ]
+          ];
+          return $this->MoodleRest->request('enrol_manual_enrol_users', $params);
      }
 }
