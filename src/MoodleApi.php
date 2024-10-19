@@ -207,4 +207,28 @@ class MoodleApi
      {
           return $this->MoodleRest->request('core_course_get_courses');
      }
+
+     /**
+      * Get a course by its ID.
+      * 
+      * @param int $courseId Course ID
+      * @return array Response from the Moodle API
+      * 
+      * @example
+      * $course = $moodleApi->getCourse(2);
+      * print_r($course);
+      */
+     public function getCourse($courseId)
+     {
+          try {
+               //code...
+               $params = [
+                    'field' => 'id',
+                    'value' => $courseId,
+               ];
+               return $this->MoodleRest->request('core_course_get_courses_by_field', $params)['courses'][0];
+          } catch (\Throwable $th) {
+               throw $th;
+          }
+     }
 }
