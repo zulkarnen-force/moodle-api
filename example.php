@@ -16,6 +16,11 @@ $userData = [
 // $response = $elearning->registerUser($userData);
 $response = $elearning->getUser('email', 'johndoe123@example.com');
 // $test = $elearning->getGradeReport(1);
-print_r($response);
+$usersInCourse = $elearning->getStudentsInCourse(2);
+$courses = $elearning->getCourses();
+
+print_r($courses);
+// print_r($usersInCourse);
+// print_r($response);
 // print_r($test);
 die();

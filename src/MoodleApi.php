@@ -176,4 +176,35 @@ class MoodleApi
           $response = $this->MoodleRest->request('core_user_get_users', $params);
           return isset($response['users'][0]) ? $response['users'][0] : null; // Return user if found or null
      }
+
+     /**
+      * Get students enrolled in a specific course by course ID.
+      * 
+      * @param int $courseId Course ID
+      * @return array Response from the Moodle API
+      * 
+      * @example
+      * $students = $moodleApi->getStudentsInCourse(2);
+      * print_r($students);
+      */
+     public function getStudentsInCourse($courseId)
+     {
+          $params = ['courseid' => $courseId];
+          return $this->MoodleRest->request('core_enrol_get_enrolled_users', $params);
+     }
+
+
+     /**
+      * Get all courses.
+      * 
+      * @return array Response from the Moodle API
+      * 
+      * @example
+      * $courses = $moodleApi->getCourses();
+      * print_r($courses);
+      */
+     public function getCourses()
+     {
+          return $this->MoodleRest->request('core_course_get_courses');
+     }
 }
