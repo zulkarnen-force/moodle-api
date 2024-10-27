@@ -11,5 +11,9 @@
     }
   },
   "minimum-stability": "stable",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "phpunit/php-code-coverage": "^9.2",
+    "phpunit/phpunit": "*"
+  }
 }

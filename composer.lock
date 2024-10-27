@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "acccf87493d5d1db7d9ce784ed177d28",
+    "content-hash": "66aebc96fd0cc1ead061fc15cadb51b9",
     "packages": [
         {
             "name": "llagerlof/moodlerest",
@@ -1791,7 +1791,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {},
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},
     "platform-dev": {},

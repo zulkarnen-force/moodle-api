@@ -1,0 +1,13 @@
+<phpunit>
+    <testsuites>
+        <testsuite name="default">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <logging>
+        <log type="text" target="reports/phpunit_report.txt"/>
+        <log type="junit" target="reports/phpunit_report.xml" logIncompleteSkipped="false"/>
+        <log type="html" target="reports/phpunit_report.html"/>
+    </logging>
+</phpunit>

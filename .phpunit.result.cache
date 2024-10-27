@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"MoodleApiTest::testElearningGetCourseGradeCategories":0.027,"MoodleApiTest::testElearningGetGradeReportWithSelfEnrolInCourse":0.018}}

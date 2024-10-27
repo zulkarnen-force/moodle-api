@@ -1,11 +1,13 @@
 # Moodle API PHP Library
 
+## Requirement
+- [Elarning Plugin](https://github.com/zulkarnen-force/Moodle-Plugin)
+
 ## Overview
 
 The **Moodle API PHP Library** is a simple PHP library built to interact with the Moodle REST API, providing functions to fetch user details, manage user accounts, retrieve course grades, and more. It is designed to easily integrate into PHP applications like CodeIgniter, Laravel, or any plain PHP project.
 
 This library relies on the [llagerlof/moodlerest](https://github.com/llagerlof/MoodleRest) package to communicate with Moodle's Web Services API.
-
 
 ## Installation
 
@@ -34,18 +36,88 @@ $moodleApi = new MoodleApi($token, $serverAddress);
 
 ### Example Usage
 
+#### Get Grade Report
+
 ```php
 $courseId = 2; // Your Moodle course ID
 $gradeReport = $moodleApi->getGradesReport($courseId);
 print_r($gradeReport);
 ```
 
+### Create Grade Category
+
+```php
+
+// Instantiate the API client with the Moodle API token and server address.
+$moodleApi = new MoodleApi('your-api-token', 'https://moodle.example.com');
+
+// Required parameters
+$courseId = 10;  // ID of the Moodle course
+$categoryName = 'Assignment Grades';  // Name of the new grade category
+
+// Optional settings for the grade category
+$options = [
+    'aggregation' => 10,        // Simple weighted mean of grades
+    'gradetype' => 1,           // Value-based grading
+    'grademax' => 100,          // Maximum grade
+    'grademin' => 0,            // Minimum grade
+    'gradepass' => 50,          // Grade to pass
+    'parentcategoryid' => 5,    // If this is a subcategory
+];
+
+// Create a new grade category
+$response = $moodleApi->createGradeCategory($courseId, $categoryName, $options);
+```
+
+### Get Selfenrol in a Course
+
+```php
+$result = $moodleApi->elearningGetSelfenrolUsersInCourse(2, 12345);
+print_r($result);
+```
+
+```
+Array
+(
+    [course] => Array
+        (
+            [id] => 2
+            [fullname] => Pengembangan Web
+            [shortname] => PW
+            [category] => 1
+        )
+
+    [selfenrol] => Array
+        (
+            [name] => TAHUN_2024
+            [password] => 12345
+        )
+
+    [users] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 7
+                    [username] => zulkarnen
+                    [userfullname] => Zul Karnen
+                    [email] => zulkarnen@example.com
+                )
+
+        )
+
+)
+```
+
+## Available Methods
+
+- `elearningGetGradeReportWithSelfEnrolInCourse($courseId, $password)` - Get grade report with selfenrol in course. 
+- `elearningGetSelfenrolUsersInCourse($courseId, $password)` - Get selfenrol users in course.
+- `elearningGetSelfenrolUsersInCourse($courseId, $password)` - Get selfenrol users in course.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for more information.
 
-
 ## Contributing
 
 Feel free to contribute to this project by submitting issues or pull requests.
-
