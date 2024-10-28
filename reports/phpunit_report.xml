@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.044982">
-    <testsuite name="default" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.044982">
-      <testsuite name="MoodleApiTest" file="/app/tests/MoodleApiTest.php" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.044982">
-        <testcase name="testElearningGetCourseGradeCategories" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="16" assertions="5" time="0.027150"/>
-        <testcase name="testElearningGetGradeReportWithSelfEnrolInCourse" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="26" assertions="5" time="0.017832"/>
+  <testsuite name="" tests="7" assertions="34" errors="0" warnings="0" failures="0" skipped="0" time="0.138333">
+    <testsuite name="default" tests="7" assertions="34" errors="0" warnings="0" failures="0" skipped="0" time="0.138333">
+      <testsuite name="MoodleApiTest" file="/app/tests/MoodleApiTest.php" tests="7" assertions="34" errors="0" warnings="0" failures="0" skipped="0" time="0.138333">
+        <testcase name="testGetCourseGradeCategories" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="19" assertions="6" time="0.026010"/>
+        <testcase name="testGetGradeReportSelfEnrol" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="31" assertions="5" time="0.015178"/>
+        <testcase name="testGetGradeReportCourse" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="46" assertions="5" time="0.018335"/>
+        <testcase name="testGetSelfEnrolCourse" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="57" assertions="7" time="0.016966"/>
+        <testcase name="testRegisterUser" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="76" assertions="2" time="0.001811"/>
+        <testcase name="testGetCourse" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="107" assertions="5" time="0.028232"/>
+        <testcase name="testGetCourses" class="MoodleApiTest" classname="MoodleApiTest" file="/app/tests/MoodleApiTest.php" line="119" assertions="4" time="0.031802"/>
       </testsuite>
     </testsuite>
   </testsuite>

@@ -1,7 +1,8 @@
 # Moodle API PHP Library
 
 ## Requirement
-- [Elarning Plugin](https://github.com/zulkarnen-force/Moodle-Plugin)
+
+- [Elearning Plugin](https://github.com/zulkarnen-force/Moodle-Plugin)
 
 ## Overview
 
@@ -110,7 +111,7 @@ Array
 
 ## Available Methods
 
-- `elearningGetGradeReportWithSelfEnrolInCourse($courseId, $password)` - Get grade report with selfenrol in course. 
+- `elearningGetGradeReportWithSelfEnrolInCourse($courseId, $password)` - Get grade report with selfenrol in course.
 - `elearningGetSelfenrolUsersInCourse($courseId, $password)` - Get selfenrol users in course.
 - `elearningGetSelfenrolUsersInCourse($courseId, $password)` - Get selfenrol users in course.
 

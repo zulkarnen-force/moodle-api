@@ -14,9 +14,9 @@ class MoodleApi
      * @param string $token Moodle API token
      * @param string $serverAddress Moodle server address
      */
-    public function __construct($token, $serverAddress)
+    public function __construct($token, $serverAddress, $moodleRest = null)
     {
-        $this->MoodleRest = new MoodleRest();
+        $this->MoodleRest = $moodleRest ?: new MoodleRest();
         $this->MoodleRest->setServerAddress($serverAddress);
         $this->MoodleRest->setToken($token);
         $this->MoodleRest->setReturnFormat(MoodleRest::RETURN_ARRAY);
@@ -375,13 +375,13 @@ class MoodleApi
      * )
      */
 
-    public function elearningGetCourseGradeCategories(int $courseId)
+    public function getCourseGradeCategories(int $courseId)
     {
         $params = [
             "courseid" => $courseId,
         ];
         return $this->MoodleRest->request(
-            "elearning_get_course_grade_categories",
+            "uad_get_gradecategories_course",
             $params
         );
     }
@@ -419,13 +419,27 @@ class MoodleApi
      *
      */
 
-    public function elearningGetGradesInCourse($courseId)
+    public function getGradeReportCourse($courseId)
     {
         $params = [
             "courseid" => $courseId,
         ];
         return $this->MoodleRest->request(
-            "elearning_get_course_grades",
+            "uad_get_gradereport",
+            $params
+        );
+    }
+
+    public function getGradeReportSelfEnrol(
+        $courseId,
+        $password
+    ) {
+        $params = [
+            "courseid" => $courseId,
+            "password" => $password,
+        ];
+        return $this->MoodleRest->request(
+            "uad_get_gradereport_selfenrol",
             $params
         );
     }
@@ -436,7 +450,7 @@ class MoodleApi
      * @param int $courseId Course ID
      * @return array contains course and grade data
      */
-    public function elearningGetSelfenrolUsersInCourse(
+    public function getSelfEnrolCourse(
         int $courseId,
         string $password
     ): mixed {
@@ -445,33 +459,10 @@ class MoodleApi
             "password" => $password,
         ];
         return $this->MoodleRest->request(
-            "elearning_get_selfenrol_users_in_course",
+            "uad_get_selfenrol",
             $params
         );
     }
 
-    public function elearningGetGradeReportInCourse($courseId)
-    {
-        $params = [
-            "courseid" => $courseId,
-        ];
-        return $this->MoodleRest->request(
-            "elearning_get_course_grades",
-            $params
-        );
-    }
 
-    public function elearningGetGradeReportWithSelfEnrolInCourse(
-        $courseId,
-        $password
-    ) {
-        $params = [
-            "courseid" => $courseId,
-            "password" => $password,
-        ];
-        return $this->MoodleRest->request(
-            "elearning_get_selfenroll_grades_with_password",
-            $params
-        );
-    }
 }
