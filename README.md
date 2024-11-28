@@ -17,7 +17,7 @@ This library relies on the [llagerlof/moodlerest](https://github.com/llagerlof/M
 First, make sure Composer is installed. Then, add the library to your project:
 
 ```bash
-composer require zulkarnen/moodle-api
+composer require zulkarnen/moodleapi
 ```
 
 ## Usage
