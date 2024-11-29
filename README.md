@@ -37,6 +37,17 @@ $moodleApi = new MoodleApi($token, $serverAddress);
 
 ### Example Usage
 
+```php
+$token = $moodleApi->getToken($username, $password, $serviceName);
+```
+```sh
+Array
+(
+    [token] => 7f28e0c47e8092508432f382f8806954
+)
+```
+
+
 #### Get Grade Report
 
 ```php
@@ -45,7 +56,7 @@ $gradeReport = $moodleApi->getGradesReport($courseId);
 print_r($gradeReport);
 ```
 
-### Create Grade Category
+####  Create Grade Category
 
 ```php
 
@@ -70,7 +81,7 @@ $options = [
 $response = $moodleApi->createGradeCategory($courseId, $categoryName, $options);
 ```
 
-### Assign Student with Selfenrol in a Course
+####  Assign Student with Selfenrol in a Course
 
 Function `createStudentSelfEnrollToCourse` is used to assign student with selfenrol in a course.
 
@@ -93,7 +104,7 @@ print_r($result);
 )
 ```
 
-### Get Selfenrol in a Course
+####  Get Selfenrol in a Course
 
 ```php
 $result = $moodleApi->elearningGetSelfenrolUsersInCourse(2, 12345);
@@ -133,7 +144,7 @@ Array
 ```
 
 ## Available Methods
-
+- `getToken($username, $password, $serviceName)` - Get token using username, password and service name.
 - `getUser($key, $value)` - Get user by criteria.
 - `getUserByUsername($username)` - Get user by username.
 - `getCourseGradeCategories($courseId)` - Get course grade categories.
