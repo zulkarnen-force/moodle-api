@@ -70,6 +70,29 @@ $options = [
 $response = $moodleApi->createGradeCategory($courseId, $categoryName, $options);
 ```
 
+### Assign Student with Selfenrol in a Course
+
+Function `createStudentSelfEnrollToCourse` is used to assign student with selfenrol in a course.
+
+```php
+$courseId = 2;
+$userId = 2;
+$enrolmentKey = "TAHUN_2024";
+$createStudentSelfEnrollToCourse = $elearning->createStudentSelfEnrollToCourse(
+    2,
+    2,
+    "TAHUN_2024"
+);
+print_r($result);
+```
+
+```
+(
+   [status] => success
+   [message] => User has been successfully enrolled in the course.
+)
+```
+
 ### Get Selfenrol in a Course
 
 ```php
@@ -111,9 +134,13 @@ Array
 
 ## Available Methods
 
-- `elearningGetGradeReportWithSelfEnrolInCourse($courseId, $password)` - Get grade report with selfenrol in course.
-- `elearningGetSelfenrolUsersInCourse($courseId, $password)` - Get selfenrol users in course.
-- `elearningGetSelfenrolUsersInCourse($courseId, $password)` - Get selfenrol users in course.
+- `getUser($key, $value)` - Get user by criteria.
+- `getUserByUsername($username)` - Get user by username.
+- `getCourseGradeCategories($courseId)` - Get course grade categories.
+- `getGradeReportCourse($courseId)` - Get grade report in course.
+- `getGradeReportSelfEnrol($courseId, $enrolmentKey)` - Get grade report with selfenrol in course.
+- `getSelfEnrolCourse($courseId, $enrolmentKey)` - Get users with selfenrol in course.
+- `createStudentSelfEnrollToCourse($userId, $courseId, $enrolmentKey)` - Create student selfenroll to course.
 
 ## License
 

@@ -1,29 +1,33 @@
 <?php
-require_once 'vendor/autoload.php'; // Make sure you include the Composer autoload file
+require_once "vendor/autoload.php"; // Make sure you include the Composer autoload file
 use Zulkarnen\MoodleApi;
-$elearning = new MoodleApi("1048c53d2b305ab071fa5a2ade26d6c8", "http://moodle:8080/webservice/rest/server.php");
+$elearning = new MoodleApi(
+    "7f28e0c47e8092508432f382f8806954",
+    "http://moodle:8080/webservice/rest/server.php"
+);
 $userData = [
-     'username' => 'zulkarnen',
-     'password' => 'Password@123',
-     'firstname' => 'Zul',
-     'lastname' => 'Karnen',
-     'email' => 'zulkarnen@example.com',
-     'auth' => 'manual', // default authentication type
-     'idnumber' => '1900016072',
-     'lang' => 'en',
-     'timezone' => 'Asia/Jakarta',
+    "username" => "zulkarnen6",
+    "password" => "Password@123",
+    "firstname" => "Zul",
+    "lastname" => "Karnen",
+    "email" => "zulkarnen6@example.com",
+    "auth" => "manual", // default authentication type
+    "idnumber" => "1900016076",
+    "lang" => "en",
+    "timezone" => "Asia/Jakarta",
 ];
 // Optional settings for the grade category
 $options = [
-     'aggregation' => 10, // e.g., Simple weighted mean of grades
-     'itemname' => 'Assignment Grades',
-     'gradetype' => 1, // Value-based grading
-     'grademax' => 100,
-     'grademin' => 0,
-     'gradepass' => 50,
-     'parentcategoryid' => 5, // If this category belongs to a parent category
+    "aggregation" => 10, // e.g., Simple weighted mean of grades
+    "itemname" => "Assignment Grades",
+    "gradetype" => 1, // Value-based grading
+    "grademax" => 100,
+    "grademin" => 0,
+    "gradepass" => 50,
+    "parentcategoryid" => 5, // If this category belongs to a parent category
 ];
 // $registerUser = $elearning->registerUser($userData);
+// print_r($registerUser);
 // print_r($registerUser);
 // $response = $elearning->getUser('email', 'johndoe123@example.com');
 // $getStudentsInCourse = $elearning->getStudentsInCourse(2);
@@ -66,7 +70,25 @@ $options = [
 // print_r($elearningGetGradesInCourse);
 // $elearningGetSelfenrolUsersInCourse = $elearning->elearningGetSelfenrolUsersInCourse(2, 12345);
 // print_r($elearningGetSelfenrolUsersInCourse);
-// 
-$elearningGetSelfenrolUsersInCourse = $elearning->getGradeReportSelfEnrol(2, 12345);
-print_r($elearningGetSelfenrolUsersInCourse);
+//
+// $elearningGetSelfenrolUsersInCourse = $elearning->getGradeReportSelfEnrol(
+//     2,
+//     12345
+// );
+// print_r($elearningGetSelfenrolUsersInCourse);
+// die();
+//
+// $createStudentSelfEnrollToCourse = $elearning->createStudentSelfEnrollToCourse(
+//     6,
+//     2,
+//     "TAHUN_2024"
+// );
+// print_r($createStudentSelfEnrollToCourse);
+
+$token = $elearning->getToken(
+    'programster',
+    'thisIsMyMoodleLoginPassword',
+    'BSI'
+);
+print_r($token);
 die();

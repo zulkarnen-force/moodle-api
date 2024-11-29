@@ -2,11 +2,26 @@
 
 namespace Zulkarnen;
 
+use Exception;
 use MoodleRest;
 
+/**
+ * Class MoodleApi
+ *
+ * This class provides a simple interface to the Moodle API.
+ * @example
+ * <code>
+ * $moodleApi = new MoodleApi("your_token", "https://moodle.example.com");
+ * $response = $moodleApi->getUser("email", "john@example.com");
+ * print_r($response);
+ * </code>
+ *
+ */
 class MoodleApi
 {
     private $MoodleRest;
+    private $serverAddress;
+    private $baseUrl;
 
     /**
      * MoodleApi constructor.
@@ -16,11 +31,101 @@ class MoodleApi
      */
     public function __construct($token, $serverAddress, $moodleRest = null)
     {
+        $this->serverAddress = $serverAddress;
+        $this->baseUrl = parse_url($serverAddress, PHP_URL_SCHEME) . '://' . parse_url($serverAddress, PHP_URL_HOST) . (parse_url($serverAddress, PHP_URL_PORT) ? ':' . parse_url($serverAddress, PHP_URL_PORT) : '');
         $this->MoodleRest = $moodleRest ?: new MoodleRest();
         $this->MoodleRest->setServerAddress($serverAddress);
         $this->MoodleRest->setToken($token);
         $this->MoodleRest->setReturnFormat(MoodleRest::RETURN_ARRAY);
     }
+
+    /**
+     * Retrieve the base URL of the Moodle server.
+     *
+     * @return string The base URL of the Moodle server.
+     */
+    public function getBaseUrl()
+    {
+        return $this->baseUrl;
+    }
+
+    /**
+     * Retrieve a Moodle token using a username and password.
+     *
+     * @param string $username Moodle username.
+     * @param string $password Moodle password.
+     * @param string $serviceName The name of the service to authenticate.
+     * @return array The token as an associative array.
+     */
+    public function getToken($username, $password, $serviceName)
+    {
+        $url = 'http://moodle:8080' . '/login/token.php';
+        $postData = http_build_query([
+            'username' => $username,
+            'password' => $password,
+            'service' => $serviceName,
+        ]);
+
+        $response = $this->makeHttpRequest($url, $postData);
+
+        if ($response && isset($response['token'])) {
+            return ['token' => $response['token']];
+        }
+
+        if (isset($response['error'])) {
+            throw new Exception('Error: ' . $response['error']);
+        }
+
+        return ['token' => ''];
+    }
+
+    /**
+     * Make a request to the Moodle Web Service API.
+     *
+     * @param string $token The token to authenticate the request.
+     * @param string $functionName The name of the Moodle web service function.
+     * @param array $params Parameters to send with the request.
+     * @return mixed|null The response data as an associative array or null on failure.
+     */
+    public function makeRequest($token, $functionName, $params = [])
+    {
+        $url = $this->baseUrl;
+        $postData = array_merge($params, [
+            'wstoken' => $token,
+            'wsfunction' => $functionName,
+            'moodlewsrestformat' => 'json',
+        ]);
+
+        return $this->makeHttpRequest($url, http_build_query($postData));
+    }
+
+    /**
+     * Helper function to make HTTP requests using cURL.
+     *
+     * @param string $url The URL to send the request to.
+     * @param string $postData The POST data to include in the request.
+     * @return array|null The response as an associative array or null on failure.
+     */
+    private function makeHttpRequest($url, $postData)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        $response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Request Error: ' . curl_error($ch);
+            curl_close($ch);
+            return null;
+        }
+
+        curl_close($ch);
+
+        return json_decode($response, true);
+    }
+
 
     /**
      * Create a new grade category in a course.
@@ -424,16 +529,11 @@ class MoodleApi
         $params = [
             "courseid" => $courseId,
         ];
-        return $this->MoodleRest->request(
-            "uad_get_gradereport",
-            $params
-        );
+        return $this->MoodleRest->request("uad_get_gradereport", $params);
     }
 
-    public function getGradeReportSelfEnrol(
-        $courseId,
-        $password
-    ) {
+    public function getGradeReportSelfEnrol($courseId, $password)
+    {
         $params = [
             "courseid" => $courseId,
             "password" => $password,
@@ -450,19 +550,35 @@ class MoodleApi
      * @param int $courseId Course ID
      * @return array contains course and grade data
      */
-    public function getSelfEnrolCourse(
-        int $courseId,
-        string $password
-    ): mixed {
+    public function getSelfEnrolCourse(int $courseId, string $password): mixed
+    {
         $params = [
             "courseid" => $courseId,
             "password" => $password,
         ];
-        return $this->MoodleRest->request(
-            "uad_get_selfenrol",
-            $params
-        );
+        return $this->MoodleRest->request("uad_get_selfenrol", $params);
     }
 
-
+    /**
+     * Create a self enrolment for a user in a course.
+     *
+     * @param int $userId User ID
+     * @param int $courseId Course ID
+     * @param string $password Password
+     * @return array Response from the Moodle API containing the status and message
+     * @example Example response: Array ( [status] => success [message] => User has been successfully enrolled in the course. )
+     *
+     */
+    public function createStudentSelfEnrollToCourse(
+        $userId,
+        $courseId,
+        $password
+    ): mixed {
+        $params = [
+            "courseid" => $courseId,
+            "password" => $password,
+            "userid" => $userId,
+        ];
+        return $this->MoodleRest->request("uad_create_selfenrol", $params);
+    }
 }
