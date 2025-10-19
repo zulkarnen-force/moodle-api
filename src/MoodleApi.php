@@ -5,127 +5,109 @@ namespace Zulkarnen;
 use Exception;
 use MoodleRest;
 
-/**
- * Class MoodleApi
- *
- * This class provides a simple interface to the Moodle API.
- * @example
- * <code>
- * $moodleApi = new MoodleApi("your_token", "https://moodle.example.com");
- * $response = $moodleApi->getUser("email", "john@example.com");
- * print_r($response);
- * </code>
- *
- */
 class MoodleApi
 {
-    private $MoodleRest;
-    private $serverAddress;
-    private $baseUrl;
-
-    /**
-     * MoodleApi constructor.
-     *
-     * @param string $token Moodle API token
-     * @param string $serverAddress Moodle server address
-     */
-    public function __construct($token, $serverAddress, $moodleRest = null)
+    public function __construct($token, $moodleUrl)
     {
-        $this->serverAddress = $serverAddress;
-        $this->baseUrl = parse_url($serverAddress, PHP_URL_SCHEME) . '://' . parse_url($serverAddress, PHP_URL_HOST) . (parse_url($serverAddress, PHP_URL_PORT) ? ':' . parse_url($serverAddress, PHP_URL_PORT) : '');
-        $this->MoodleRest = $moodleRest ?: new MoodleRest();
+        $serverAddress = $moodleUrl.'/webservice/rest/server.php';
+        $this->serverAddress = $serverAddress;       
+        $this->MoodleRest = new MoodleRest();
         $this->MoodleRest->setServerAddress($serverAddress);
         $this->MoodleRest->setToken($token);
         $this->MoodleRest->setReturnFormat(MoodleRest::RETURN_ARRAY);
     }
 
-    /**
-     * Retrieve the base URL of the Moodle server.
+     /**
+     * Get a user by their username.
      *
-     * @return string The base URL of the Moodle server.
+     * @param string $username Username of the user
+     * @return array Response from the Moodle API
+     *
+     * @example
+     * $user = $moodleApi->getUserByUsername('johndoe');
+     * print_r($user);
      */
-    public function getBaseUrl()
+    public function getUserByUsername($username)
     {
-        return $this->baseUrl;
+        $params = [
+            "field" => "username",
+            "values" => [$username]
+        ];
+        $users = $this->MoodleRest->request("core_user_get_users_by_field", $params);
+        return $users[0] ?? null;
     }
 
-    /**
-     * Retrieve a Moodle token using a username and password.
-     *
-     * @param string $username Moodle username.
-     * @param string $password Moodle password.
-     * @param string $serviceName The name of the service to authenticate.
-     * @return array The token as an associative array.
-     */
-    public function getToken($username, $password, $serviceName)
+    public function getUserCourses($userId)
     {
-        $url = 'http://moodle:8080' . '/login/token.php';
-        $postData = http_build_query([
-            'username' => $username,
-            'password' => $password,
-            'service' => $serviceName,
-        ]);
+        $params = [
+            "userid" => $userId,
+        ];
+        return $this->MoodleRest->request("core_enrol_get_users_courses", $params);
+    }   
 
-        $response = $this->makeHttpRequest($url, $postData);
+    public function getUserGrades($courseId)
+    {
+        // Step 1: Get enrolled users and build a lookup map by userid
+        $usersInCourse = $this->getEnrolledUsers($courseId);
 
-        if ($response && isset($response['token'])) {
-            return ['token' => $response['token']];
+        // check if usersInCourse is valid
+        if (!is_array($usersInCourse)) {
+            throw new Exception("Failed to fetch enrolled users for course ID: {$courseId}");
         }
 
-        if (isset($response['error'])) {
-            throw new Exception('Error: ' . $response['error']);
+        // Create an associative array: [userid => email]
+        $userEmailMap = [];
+        foreach ($usersInCourse as $user) {
+            // Ensure the user object has 'id' and 'email'
+            if (isset($user['id']) && isset($user['email'])) {
+                $userEmailMap[$user['id']] = $user['email'];
+            }
         }
 
-        return ['token' => ''];
-    }
+        // Step 2: Get grade report
+        $params = ['courseid' => $courseId];
+        $gradesReport = $this->MoodleRest->request("gradereport_user_get_grade_items", $params);
+        $usergrades = $gradesReport['usergrades'] ?? [];
 
-    /**
-     * Make a request to the Moodle Web Service API.
-     *
-     * @param string $token The token to authenticate the request.
-     * @param string $functionName The name of the Moodle web service function.
-     * @param array $params Parameters to send with the request.
-     * @return mixed|null The response data as an associative array or null on failure.
-     */
-    public function makeRequest($token, $functionName, $params = [])
-    {
-        $url = $this->baseUrl;
-        $postData = array_merge($params, [
-            'wstoken' => $token,
-            'wsfunction' => $functionName,
-            'moodlewsrestformat' => 'json',
-        ]);
+        // Step 3: Inject email into each usergrade
+        foreach ($usergrades as &$usergrade) {
+            $userid = $usergrade['userid'] ?? null;
+            $usergrade['email'] = $userid && isset($userEmailMap[$userid])
+                ? $userEmailMap[$userid]
+                : ''; // or null, depending on your preference
+        }
+        unset($usergrade); // break the reference
 
-        return $this->makeHttpRequest($url, http_build_query($postData));
-    }
-
-    /**
-     * Helper function to make HTTP requests using cURL.
-     *
-     * @param string $url The URL to send the request to.
-     * @param string $postData The POST data to include in the request.
-     * @return array|null The response as an associative array or null on failure.
-     */
-    private function makeHttpRequest($url, $postData)
-    {
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        $response = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Request Error: ' . curl_error($ch);
-            curl_close($ch);
-            return null;
+        // Step 4: Extract grade items (from first user, if available)
+        $gradeItems = [];
+        if (!empty($usergrades) && !empty($usergrades[0]['gradeitems'])) {
+            foreach ($usergrades[0]['gradeitems'] as $item) {
+                $gradeItems[] = [
+                    'id' => $item['id'],
+                    'itemtype' => $item['itemtype'],
+                    'itemname' => $item['itemname']                   
+                ];
+            }
         }
 
-        curl_close($ch);
-
-        return json_decode($response, true);
+        return [
+            'gradeitems' => $gradeItems,
+            'usergrades' => $usergrades
+        ];
     }
 
+    public function getEnrolledUsers($courseId)
+    {
+        $params = [
+            'courseid' => $courseId            
+        ];
+        $enrolledUsers = $this->MoodleRest->request(
+            "core_enrol_get_enrolled_users",
+            $params
+        );
+
+        return $enrolledUsers;       
+    }
 
     /**
      * Create a new grade category in a course.
@@ -174,54 +156,7 @@ class MoodleApi
             $params
         );
         return $response;
-    }
-
-    /**
-     * Get grade report for a course.
-     *
-     * @param int $courseId Course ID
-     * @return array Response from the Moodle API
-     *
-     * @example
-     * $gradeReport = $moodleApi->getGradeReport(2);
-     * print_r($gradeReport);
-     */
-    public function getGradesReport($courseId)
-    {
-        // Step 1: Get grades report for the course
-        $params = ["courseid" => $courseId];
-        $gradesReport = $this->MoodleRest->request(
-            "gradereport_user_get_grade_items",
-            $params
-        )["usergrades"];
-
-        // Step 2: Retrieve grade categories for the course
-        $gradeCategories = $this->MoodleRest->request(
-            "local_gradecategories_get_grade_categories",
-            ["courseid" => $courseId]
-        );
-        // Step 3: Map grade category IDs to their names
-        $categoryMap = [];
-        foreach ($gradeCategories as $gradeCategory) {
-            if (isset($gradeCategory["id"])) {
-                $categoryMap[$gradeCategory["id"]] = $gradeCategory["name"];
-            }
-        }
-
-        // // Step 4: Add category names to grade items
-        foreach ($gradesReport as &$userGrade) {
-            foreach ($userGrade["gradeitems"] as &$gradeItem) {
-                if (isset($gradeItem["categoryid"]) && isset($categoryMap[3])) {
-                    $gradeItem["categoryname"] =
-                        $categoryMap[$gradeItem["categoryid"]];
-                } else {
-                    $gradeItem["categoryname"] = "Unknown"; // Fallback if category not found
-                }
-            }
-        }
-
-        return $gradesReport;
-    }
+    }   
 
     /**
      * Register a new user on Moodle.
@@ -244,6 +179,7 @@ class MoodleApi
      * $response = $moodleApi->registerUser($userData);
      * print_r($response);
      */
+
     public function registerUser($userData)
     {
         $params = [
@@ -276,28 +212,7 @@ class MoodleApi
         return $this->MoodleRest->request("core_user_get_users", $params);
     }
 
-    /**
-     * Get a user by their username.
-     *
-     * @param string $username Username of the user
-     * @return array Response from the Moodle API
-     *
-     * @example
-     * $user = $moodleApi->getUserByUsername('johndoe');
-     * print_r($user);
-     */
-    public function getUserByUsername($username)
-    {
-        $params = [
-            "criteria" => [
-                [
-                    "key" => "username",
-                    "value" => $username,
-                ],
-            ],
-        ];
-        return $this->MoodleRest->request("core_user_get_users", $params);
-    }
+   
 
     /**
      * Get a user by a specific key (e.g., username or email).
@@ -422,13 +337,13 @@ class MoodleApi
         return $this->MoodleRest->request("enrol_manual_enrol_users", $params);
     }
 
-    public function getCourseCategories()
+    public function getCourseCategories($categoryId)
     {
         $params = [
             "criteria" => [
                 [
                     "key" => "idnumber",
-                    "value" => 6,
+                    "value" => $categoryId,
                 ],
             ],
         ];
@@ -438,13 +353,7 @@ class MoodleApi
         );
     }
 
-    public function getLocal()
-    {
-        $function_name = "local_myapi_get_data"; // Replace with your function name
-        return $this->MoodleRest->request("local_myapi_get_data", [
-            "param" => "example_value",
-        ]);
-    }
+    
 
     /**
      *
