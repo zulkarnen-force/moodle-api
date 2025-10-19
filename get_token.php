@@ -14,7 +14,7 @@ class GetToken {
     private function fetchToken() {
 
         // Your Moodle credentials (use a dedicated service account if possible)
-        $baseUrl = 'https://elearning.uad.ac.id';
+        $baseUrl = '';
         $username = '';
         $password = '';
         $serviceName = 'moodle_mobile_app'; // Must match the external service name in Moodle
